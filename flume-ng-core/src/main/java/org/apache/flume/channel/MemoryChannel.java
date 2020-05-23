@@ -18,6 +18,7 @@
  */
 package org.apache.flume.channel;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import org.apache.flume.ChannelException;
 import org.apache.flume.ChannelFullException;
@@ -26,6 +27,7 @@ import org.apache.flume.Event;
 import org.apache.flume.annotations.InterfaceAudience;
 import org.apache.flume.annotations.InterfaceStability;
 import org.apache.flume.annotations.Recyclable;
+import org.apache.flume.conf.TransactionCapacitySupported;
 import org.apache.flume.instrumentation.ChannelCounter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +51,7 @@ import java.util.concurrent.TimeUnit;
 @InterfaceAudience.Public
 @InterfaceStability.Stable
 @Recyclable
-public class MemoryChannel extends BasicChannelSemantics {
+public class MemoryChannel extends BasicChannelSemantics implements TransactionCapacitySupported {
   private static Logger LOGGER = LoggerFactory.getLogger(MemoryChannel.class);
   private static final Integer defaultCapacity = 100;
   private static final Integer defaultTransCapacity = 100;
@@ -171,7 +173,6 @@ public class MemoryChannel extends BasicChannelSemantics {
         }
         putList.clear();
       }
-      bytesRemaining.release(putByteCounter);
       putByteCounter = 0;
       takeByteCounter = 0;
 
@@ -373,5 +374,14 @@ public class MemoryChannel extends BasicChannelSemantics {
     }
     //Each event occupies at least 1 slot, so return 1.
     return 1;
+  }
+
+  @VisibleForTesting
+  int getBytesRemainingValue() {
+    return bytesRemaining.availablePermits();
+  }
+
+  public long getTransactionCapacity() {
+    return transCapacity;
   }
 }

@@ -19,7 +19,6 @@
 
 package org.apache.flume.source.thriftLegacy;
 
-import java.lang.InterruptedException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -100,7 +99,6 @@ public class ThriftLegacySource  extends AbstractSource implements
       }
 
       counterGroup.incrementAndGet("rpc.successful");
-      return;
     }
 
     public void close() {
